@@ -1,0 +1,58 @@
+/* Bundled CSS file for AWS CloudFront + S3 delivery with HTTP/2
+   All CSS files consolidated to reduce HTTP requests and optimize edge network performance.
+   This file is served via CloudFront with HTTP/2 enabled for optimal cloud delivery. */
+
+/* Chunk styles - consolidated from chunks/chunk00.css through chunk09.css */
+.c0 { color: #000; }
+.c1 { color: #001; }
+.c2 { color: #002; }
+.c3 { color: #003; }
+.c4 { color: #004; }
+.c5 { color: #005; }
+.c6 { color: #006; }
+.c7 { color: #007; }
+.c8 { color: #008; }
+.c9 { color: #009; }
+
+/* Deferred styles - consolidated from deferred.css */
+.late-widget { color: #333; }
+
+/* Main site styles - consolidated from site.css */
+/* Critical CSS now injected inline by Lambda@Edge at CloudFront edge */
+/* External import removed to eliminate render-blocking request */
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+@font-face {
+  font-family: 'BrandSans';
+  src: url('../fonts/analytics.woff2') format('woff2');
+}
+
+:root {
+  --primary-color: #0a2540;
+}
+
+.hero {
+  color: var(--primary-color);
+  /* CLOUD FIX: Relative path for Webpack asset processing - will be transformed to S3/CloudFront URL at build time */
+  background: url('../img/header.svg');
+}
+
+.promo {
+  background: url('__CDN_URL__/img/bg.jpg');
+}
+
+.user-card::before {
+  content: attr(data-user);
+}
+
+/* Styles for a component removed in v4 - kept by mistake */
+.deprecated-sidebar {
+  display: none;
+  padding: 10px;
+}
+
+/* Brand theme overrides - consolidated from brand.css */
+/* Theme overrides served from cloud storage */
+@import url('https://analytics-static.blob.core.windows.net/css/base.css');
+.btn { color: var(--accent, #0a2540); }

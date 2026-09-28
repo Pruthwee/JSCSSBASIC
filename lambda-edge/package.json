@@ -1,0 +1,23 @@
+{
+  "name": "lambda-edge-critical-css",
+  "version": "1.0.0",
+  "description": "Lambda@Edge function to inject critical CSS inline into HTML responses at CloudFront edge",
+  "main": "inject-critical-css.js",
+  "scripts": {
+    "test": "node test-handler.js",
+    "package": "zip -r inject-critical-css.zip inject-critical-css.js",
+    "deploy": "aws lambda update-function-code --region us-east-1 --function-name InjectCriticalCSS --zip-file fileb://inject-critical-css.zip"
+  },
+  "keywords": [
+    "lambda-edge",
+    "cloudfront",
+    "critical-css",
+    "performance",
+    "aws"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

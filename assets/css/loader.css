@@ -1,15 +1,9 @@
-/* Multiple separate CSS files loaded individually — not concatenated or bundled.
-   This pattern creates excessive HTTP requests and should be concatenated. */
-@import url('chunks/chunk00.css');
-@import url('chunks/chunk01.css');
-@import url('chunks/chunk02.css');
-@import url('chunks/chunk03.css');
-@import url('chunks/chunk04.css');
-@import url('chunks/chunk05.css');
-@import url('chunks/chunk06.css');
-@import url('chunks/chunk07.css');
-@import url('chunks/chunk08.css');
-@import url('chunks/chunk09.css');
-@import url('deferred.css');
-@import url('site.css');
-@import url('brand.css');
+/* CLOUD-READY: Single bundled CSS file for AWS CloudFront + S3 delivery with HTTP/2
+   All CSS files consolidated into bundle.css to reduce HTTP requests and optimize 
+   edge network performance. This eliminates the excessive HTTP request overhead
+   that was caused by loading 10+ separate CSS files individually.
+   
+   The bundled file is served via AWS S3 + CloudFront with HTTP/2 enabled for
+   optimal cloud delivery and performance. */
+
+@import url('bundle.css');

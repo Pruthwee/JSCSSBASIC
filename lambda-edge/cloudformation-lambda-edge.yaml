@@ -1,0 +1,97 @@
+# CloudFormation Template for Lambda@Edge Critical CSS Injection
+# This template creates the Lambda@Edge function and IAM role needed for critical CSS injection
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Lambda@Edge function to inject critical CSS inline into HTML responses'
+
+Parameters:
+  FunctionName:
+    Type: String
+    Default: InjectCriticalCSS
+    Description: Name of the Lambda@Edge function
+  
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket containing the Lambda function code (inject-critical-css.zip)
+  
+  LambdaCodeKey:
+    Type: String
+    Default: lambda-edge/inject-critical-css.zip
+    Description: S3 key for the Lambda function code
+
+Resources:
+  # IAM Role for Lambda@Edge execution
+  LambdaEdgeExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${FunctionName}-ExecutionRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: Purpose
+          Value: LambdaEdge-CriticalCSS
+
+  # Lambda@Edge Function
+  CriticalCSSInjectionFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Runtime: nodejs20.x
+      Handler: inject-critical-css.handler
+      Role: !GetAtt LambdaEdgeExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+      Timeout: 5
+      MemorySize: 128
+      Description: Injects critical CSS inline into HTML responses at CloudFront edge
+      Tags:
+        - Key: Purpose
+          Value: CriticalCSS-Optimization
+
+  # Lambda Function Version (required for Lambda@Edge)
+  CriticalCSSFunctionVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref CriticalCSSInjectionFunction
+      Description: Version for Lambda@Edge association
+
+Outputs:
+  LambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt CriticalCSSInjectionFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionArn'
+  
+  LambdaFunctionVersionArn:
+    Description: ARN of the Lambda function version (use this for CloudFront association)
+    Value: !Ref CriticalCSSFunctionVersion
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionVersionArn'
+  
+  LambdaExecutionRoleArn:
+    Description: ARN of the Lambda execution role
+    Value: !GetAtt LambdaEdgeExecutionRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ExecutionRoleArn'
+
+# Usage Instructions:
+# 1. Upload inject-critical-css.zip to S3 bucket
+# 2. Deploy this CloudFormation stack in us-east-1 region:
+#    aws cloudformation create-stack \
+#      --region us-east-1 \
+#      --stack-name critical-css-lambda-edge \
+#      --template-body file://cloudformation-lambda-edge.yaml \
+#      --parameters ParameterKey=LambdaCodeBucket,ParameterValue=your-bucket-name \
+#      --capabilities CAPABILITY_NAMED_IAM
+# 3. Get the Lambda function version ARN from stack outputs
+# 4. Associate the Lambda function version with CloudFront distribution

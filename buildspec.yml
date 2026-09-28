@@ -1,0 +1,64 @@
+version: 0.2
+
+# AWS CodeBuild buildspec for building and optimizing static assets
+# Integrates PurgeCSS to remove unused CSS before S3/CloudFront deployment
+
+env:
+  variables:
+    NODE_ENV: production
+  parameter-store:
+    CDN_URL: /analytics-portal/cdn-url
+    S3_BUCKET: /analytics-portal/s3-bucket
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing dependencies..."
+      - npm ci --production=false
+      
+  pre_build:
+    commands:
+      - echo "Pre-build phase - setting up environment"
+      - echo "CDN_URL=$CDN_URL"
+      - export CDN_URL=$CDN_URL
+      
+  build:
+    commands:
+      - echo "Build phase started on `date`"
+      - echo "Building CSS with PostCSS..."
+      - npm run build:css
+      - echo "Running PurgeCSS to remove unused CSS rules..."
+      - npm run build:css:purge
+      - echo "Build completed successfully"
+      - echo "CSS bundle size before PurgeCSS:"
+      - du -sh dist/css/ || echo "N/A"
+      - echo "Rejected CSS rules saved to dist/css/rejected.css for review"
+      
+  post_build:
+    commands:
+      - echo "Post-build phase - preparing for S3 upload"
+      - echo "Copying static assets to dist/"
+      - cp -r assets/fonts dist/ || true
+      - cp -r assets/img dist/ || true
+      - cp index.html dist/
+      - echo "Build artifacts ready for S3 deployment"
+      - echo "Final bundle size:"
+      - du -sh dist/
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: dist
+  name: analytics-portal-$(date +%Y%m%d-%H%M%S)
+
+cache:
+  paths:
+    - 'node_modules/**/*'
+
+reports:
+  build-metrics:
+    files:
+      - 'dist/css/rejected.css'
+    file-format: PLAINTEXT

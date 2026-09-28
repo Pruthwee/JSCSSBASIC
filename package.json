@@ -1,5 +1,23 @@
 {
   "name": "analytics-portal",
   "type": "module",
-  "dependencies": { "@emotion/styled": "^11.11.0" }
+  "scripts": {
+    "build:css:bundle": "cat assets/css/chunks/*.css assets/css/deferred.css assets/css/site.css assets/css/brand.css > assets/css/bundle.css",
+    "build:css:critical": "cat assets/css/client-hydration.css > dist/css/critical-hydration.css",
+    "build:css": "npm run build:css:bundle && npm run build:css:critical && postcss assets/css/**/*.css --dir dist/css --env production",
+    "deploy:lambda-edge": "cd lambda-edge && npm install && zip -r ../lambda-edge-inject-css.zip . && aws lambda update-function-code --function-name inject-critical-css --zip-file fileb://../lambda-edge-inject-css.zip",
+    "build:css:purge": "purgecss --config purgecss.config.js --output dist/css",
+    "build": "npm run build:css && npm run build:css:purge",
+    "deploy:s3": "aws s3 sync dist/css s3://${S3_BUCKET}/css --cache-control max-age=31536000 --metadata-directive REPLACE"
+  },
+  "dependencies": {
+    "@emotion/styled": "^11.11.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.31",
+    "postcss-cli": "^10.1.0",
+    "postcss-replace": "^2.0.1",
+    "@fullhuman/postcss-purgecss": "^5.0.0",
+    "purgecss": "^5.0.0"
+  }
 }

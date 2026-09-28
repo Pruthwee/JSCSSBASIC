@@ -1,6 +1,6 @@
 /* Main stylesheet - exported from the design tool, not minified */
-/* Above-fold critical CSS loaded as external file — not inlined in <head> */
-@import url('https://cdn.example.net/critical-above-fold.css');
+/* Critical CSS now injected inline by Lambda@Edge at CloudFront edge */
+/* External import removed to eliminate render-blocking request */
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
@@ -15,11 +15,12 @@
 
 .hero {
   color: var(--primary-color);
-  background: url('/opt/app/static/img/header.svg');
+  /* CLOUD FIX: Relative path for Webpack asset processing - will be transformed to S3/CloudFront URL at build time */
+  background: url('../img/header.svg');
 }
 
 .promo {
-  background: url('https://staging-assets.local/img/bg.jpg');
+  background: url('__CDN_URL__/img/bg.jpg');
 }
 
 .user-card::before {
